@@ -1,7 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import {
+  audioBrief,
   audienceSignals,
   distribution,
   edition,
@@ -37,21 +38,61 @@ function SourceLink({ source, children }: { source: Source; children?: React.Rea
   return <a className="source-link" href={source.url} target="_blank" rel="noreferrer">{children ?? source.outlet}<span aria-hidden="true">↗</span></a>;
 }
 
+function sourceLinkLabel(source: Source) {
+  if (source.url.includes("youtube.com")) return "Watch full interview";
+  if (source.url.includes("reddit.com")) return "View full discussion";
+  if (source.url.endsWith(".pdf") || source.category === "Official") return "Open source";
+  if (source.url.includes("podcasts.apple.com")) return "Open podcast";
+  return "Read full article";
+}
+
+function AudioBrief() {
+  const audio = useRef<HTMLAudioElement>(null);
+  const [playing, setPlaying] = useState(false);
+  const [current, setCurrent] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const [speed, setSpeed] = useState(1);
+  const clock = (seconds: number) => `${Math.floor(seconds / 60)}:${String(Math.floor(seconds % 60)).padStart(2, "0")}`;
+  const toggle = async () => {
+    if (!audio.current) return;
+    if (audio.current.paused) await audio.current.play();
+    else audio.current.pause();
+  };
+  const seek = (seconds: number) => {
+    if (!audio.current) return;
+    audio.current.currentTime = Math.max(0, Math.min(audio.current.duration || 0, audio.current.currentTime + seconds));
+  };
+
+  return <section className="audio-brief" aria-labelledby="audio-title">
+    <div className="audio-brief-copy"><span>LISTEN FIRST · {audioBrief.label}</span><h2 id="audio-title">{audioBrief.title}</h2><p>The complete signal, restraint and next-watch item in one concise listen.</p></div>
+    <div className="audio-controls">
+      <button type="button" onClick={() => seek(-15)} aria-label="Back 15 seconds">−15</button>
+      <button type="button" className="audio-play" onClick={toggle} aria-label={playing ? "Pause The Echo audio brief" : "Play The Echo audio brief"}>{playing ? "Ⅱ" : "▶"}</button>
+      <div className="audio-timeline"><span>{clock(current)}</span><input type="range" min="0" max={duration || 0} step="0.1" value={current} onChange={(event) => { if (audio.current) audio.current.currentTime = Number(event.target.value); }} aria-label="Audio timeline" /><span>{duration ? clock(duration) : "~2:00"}</span></div>
+      <button type="button" onClick={() => seek(15)} aria-label="Forward 15 seconds">+15</button>
+      <select value={speed} onChange={(event) => { const next = Number(event.target.value); setSpeed(next); if (audio.current) audio.current.playbackRate = next; }} aria-label="Playback speed"><option value="1">1×</option><option value="1.25">1.25×</option><option value="1.5">1.5×</option></select>
+    </div>
+    <details className="audio-transcript"><summary>Read the full transcript</summary><div>{audioBrief.paragraphs.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}</div></details>
+    <audio ref={audio} preload="metadata" src={audioBrief.src} onLoadedMetadata={(event) => setDuration(event.currentTarget.duration)} onTimeUpdate={(event) => setCurrent(event.currentTarget.currentTime)} onPlay={() => setPlaying(true)} onPause={() => setPlaying(false)} onEnded={() => { setPlaying(false); setCurrent(0); }} />
+  </section>;
+}
+
 function SourceCard({ source }: { source: Source }) {
   return <article className="source-card">
     <div className="source-card-top"><span>{source.category}</span><b className={toneClass(source.sentiment)}>{source.sentiment}</b></div>
     <h3>{source.source}</h3>
-    <p>{source.evidence}</p>
+    <p className="source-evidence">{source.evidence}</p>
+    {source.quote && <blockquote className="source-quote"><p>“{source.quote}”</p><footer><strong>{source.speaker}</strong><small>{source.speakerRole}<br />{source.quoteContext}</small></footer></blockquote>}
     <div className="tags">{source.themes.slice(0, 3).map((theme) => <span key={theme}>{theme}</span>)}</div>
-    <footer><small>{source.outlet} · {source.date} · {source.confidence} confidence</small><SourceLink source={source}>Open</SourceLink></footer>
+    <footer><small>{source.outlet} · {source.date} · {source.confidence} confidence</small><SourceLink source={source}>{sourceLinkLabel(source)}</SourceLink></footer>
   </article>;
 }
 
 function QuoteCard({ source, quiet = false }: { source: Source; quiet?: boolean }) {
   return <article className={`quote-card ${quiet ? "quiet" : ""}`}>
     <span>{source.quoteType}</span>
-    <p>{source.quote}</p>
-    <footer><strong>{source.source}</strong><small>{source.outlet} · {source.date}</small><SourceLink source={source}>Source</SourceLink></footer>
+    <p>“{source.quote}”</p>
+    <footer><strong>{source.speaker ?? "Public commenter"}</strong><small>{source.speakerRole && <>{source.speakerRole}<br /></>}{source.quoteContext && <>{source.quoteContext}<br /></>}{source.outlet} · {source.date}</small><SourceLink source={source}>{sourceLinkLabel(source)}</SourceLink></footer>
   </article>;
 }
 
@@ -88,7 +129,7 @@ function SourceLedger() {
     </div>
     <div className="ledger-wrap"><table>
       <thead><tr><th>Source</th><th>Category</th><th>Date</th><th>Sentiment</th><th>Confidence</th><th>Link</th></tr></thead>
-      <tbody>{visible.map((source) => <tr key={source.id}><td><strong>{source.source}</strong><small>{source.outlet}<br />{source.themes.join(" · ")}</small></td><td>{source.category}</td><td>{source.date}</td><td><span className={`ledger-tone ${toneClass(source.sentiment)}`}>{source.sentiment}</span></td><td>{source.confidence}</td><td><SourceLink source={source}>Open</SourceLink></td></tr>)}</tbody>
+      <tbody>{visible.map((source) => <tr key={source.id}><td><strong>{source.source}</strong><small>{source.outlet}<br />{source.themes.join(" · ")}</small></td><td>{source.category}</td><td>{source.date}</td><td><span className={`ledger-tone ${toneClass(source.sentiment)}`}>{source.sentiment}</span></td><td>{source.confidence}</td><td><SourceLink source={source}>{sourceLinkLabel(source)}</SourceLink></td></tr>)}</tbody>
     </table></div>
   </>;
 }
@@ -106,6 +147,8 @@ export default function Dashboard() {
 
   return <main>
     <header className="topbar"><Brand compact /><span>Ownership Intelligence · Perception Monitor</span><div><button onClick={() => window.print()}>Print</button><button onClick={share}>Share</button></div></header>
+
+    <AudioBrief />
 
     <section className="hero">
       <div className="hero-art" aria-hidden="true"><span>THE</span><strong>ECHO</strong><i /></div>
@@ -140,7 +183,7 @@ export default function Dashboard() {
     </section>
 
     <section id="voices" className="report-section dark-section">
-      <SectionHead n="04" eyebrow="Direct evidence" title="What players and coaches are saying" copy="Quoted language is separated from AVC interpretation. Each item links to its source." />
+      <SectionHead n="04" eyebrow="Direct evidence" title="What players and coaches are saying" copy="Every selected quote is presented in full on the page, with speaker and context. The source link is available only when ownership wants the complete article or interview." />
       <div className="quote-grid">{playerSources.filter((source) => source.quote).map((source) => <QuoteCard key={source.id} source={source} />)}</div>
       <div className="interpretation"><span>Interpretation</span><p>The public player-and-coach language converged on fit, intelligence and collective response. The most important restraint: the available public sample did not include a broad set of direct teammate reactions to Plum, so chemistry claims remain early.</p></div>
     </section>
