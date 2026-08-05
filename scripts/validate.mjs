@@ -3,6 +3,7 @@ import { sources, edition, audioBrief } from "../data/edition.ts";
 
 const dashboard = await readFile("app/Dashboard.tsx", "utf8");
 const layout = await readFile("app/layout.tsx", "utf8");
+const styles = await readFile("app/globals.css", "utf8");
 const audioTranscript = (await readFile("content/audio-brief-transcript.txt", "utf8")).trim();
 const required = ["THE ECHO", "The Plum Effect", "Ownership readout", "Source ledger", "#DOMINATE", "Mat"];
 const forbidden = ["Matt Ishbia", "placeholder", "scientific public approval"];
@@ -10,6 +11,7 @@ const failures = [];
 
 for (const token of required) if (!dashboard.includes(token) && !layout.includes(token)) failures.push(`Missing token: ${token}`);
 for (const token of forbidden) if (dashboard.includes(token) || layout.includes(token)) failures.push(`Forbidden token: ${token}`);
+for (const token of ["echo-audio-glow", "echo-audio-flow", "prefers-reduced-motion"]) if (!styles.includes(token)) failures.push(`Missing reusable audio treatment: ${token}`);
 if (sources.length !== edition.sourceCount) failures.push(`Source count mismatch: data=${sources.length}, edition=${edition.sourceCount}`);
 if (new Set(sources.map((source) => source.id)).size !== sources.length) failures.push("Duplicate source ids detected");
 for (const source of sources) {

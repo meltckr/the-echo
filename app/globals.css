@@ -15,5 +15,8 @@
 @media(prefers-reduced-motion:reduce){.audio-brief *{animation:none!important}}
 @media print{.audio-brief{display:none!important}}
 
+/* Shared Mercury audio-attention treatment: keep this on future Echo editions. */
+.audio-brief{overflow:hidden;border-top:1px solid rgba(32,211,186,.5);border-bottom:1px solid rgba(32,211,186,.5);box-shadow:inset 0 3px 0 var(--teal),inset 0 0 28px rgba(0,180,166,.08),0 0 0 1px rgba(32,211,186,.12),0 0 34px rgba(0,199,181,.28);animation:echo-audio-glow 2.8s ease-in-out infinite}.audio-brief:after{content:"";position:absolute;z-index:0;inset:0 0 auto;height:3px;background:linear-gradient(90deg,var(--teal),var(--gold),var(--orange),var(--purple),var(--teal));background-size:300% 100%;animation:echo-audio-flow 4s linear infinite}.audio-brief>*{position:relative;z-index:1}@keyframes echo-audio-glow{50%{border-color:rgba(242,193,78,.72);box-shadow:inset 0 3px 0 rgba(242,193,78,.9),inset 0 0 36px rgba(0,180,166,.13),0 0 0 2px rgba(32,211,186,.32),0 0 56px rgba(0,199,181,.5)}}@keyframes echo-audio-flow{to{background-position:300% 0}}@media(prefers-reduced-motion:reduce){.audio-brief,.audio-brief:after{animation:none!important}}
+
 /* GitHub Pages public-asset base path. */
 .hero{background-image:linear-gradient(135deg,rgba(7,8,13,.78),rgba(7,8,13,.94)),url('/the-echo/assets/backgrounds/mercury-game-bg.jpg')}
