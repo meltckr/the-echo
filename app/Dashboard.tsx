@@ -54,9 +54,20 @@ function AudioBrief() {
   const [speed, setSpeed] = useState(1.1);
   const progress = duration > 0 ? Math.min(100, Math.max(0, (current / duration) * 100)) : 0;
   useEffect(() => {
-    if (!audio.current) return;
-    audio.current.playbackRate = speed;
-    if ("preservesPitch" in audio.current) audio.current.preservesPitch = true;
+    const player = audio.current;
+    if (!player) return;
+    const syncMetadata = () => {
+      player.playbackRate = speed;
+      if ("preservesPitch" in player) player.preservesPitch = true;
+      if (Number.isFinite(player.duration) && player.duration > 0) setDuration(player.duration);
+    };
+    syncMetadata();
+    player.addEventListener("loadedmetadata", syncMetadata);
+    player.addEventListener("durationchange", syncMetadata);
+    return () => {
+      player.removeEventListener("loadedmetadata", syncMetadata);
+      player.removeEventListener("durationchange", syncMetadata);
+    };
   }, [speed]);
   useEffect(() => {
     if (!playing) return;
