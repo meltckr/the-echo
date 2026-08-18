@@ -58,6 +58,17 @@ function AudioBrief() {
     audio.current.playbackRate = speed;
     audio.current.preservesPitch = true;
   }, [speed]);
+  useEffect(() => {
+    if (!playing) return;
+    let frame = 0;
+    const syncProgress = () => {
+      if (!audio.current || audio.current.paused) return;
+      setCurrent(audio.current.currentTime);
+      frame = window.requestAnimationFrame(syncProgress);
+    };
+    frame = window.requestAnimationFrame(syncProgress);
+    return () => window.cancelAnimationFrame(frame);
+  }, [playing]);
   const clock = (seconds: number) => `${Math.floor(seconds / 60)}:${String(Math.floor(seconds % 60)).padStart(2, "0")}`;
   const toggle = async () => {
     if (!audio.current) return;
@@ -66,7 +77,9 @@ function AudioBrief() {
   };
   const seek = (seconds: number) => {
     if (!audio.current) return;
-    audio.current.currentTime = Math.max(0, Math.min(audio.current.duration || 0, audio.current.currentTime + seconds));
+    const next = Math.max(0, Math.min(audio.current.duration || 0, audio.current.currentTime + seconds));
+    audio.current.currentTime = next;
+    setCurrent(next);
   };
   const setTimeline = (value: number) => {
     if (!audio.current) return;
