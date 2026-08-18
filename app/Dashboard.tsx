@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   audioBrief,
   audienceSignals,
@@ -52,6 +52,12 @@ function AudioBrief() {
   const [current, setCurrent] = useState(0);
   const [duration, setDuration] = useState(0);
   const [speed, setSpeed] = useState(1);
+  const progress = duration > 0 ? Math.min(100, Math.max(0, (current / duration) * 100)) : 0;
+  useEffect(() => {
+    if (!audio.current) return;
+    audio.current.playbackRate = speed;
+    audio.current.preservesPitch = true;
+  }, [speed]);
   const clock = (seconds: number) => `${Math.floor(seconds / 60)}:${String(Math.floor(seconds % 60)).padStart(2, "0")}`;
   const toggle = async () => {
     if (!audio.current) return;
@@ -62,18 +68,29 @@ function AudioBrief() {
     if (!audio.current) return;
     audio.current.currentTime = Math.max(0, Math.min(audio.current.duration || 0, audio.current.currentTime + seconds));
   };
+  const setTimeline = (value: number) => {
+    if (!audio.current) return;
+    const bounded = Math.max(0, Math.min(audio.current.duration || 0, value));
+    audio.current.currentTime = bounded;
+    setCurrent(bounded);
+  };
+  const scrubAtClientX = (input: HTMLInputElement, clientX: number) => {
+    const bounds = input.getBoundingClientRect();
+    const ratio = Math.max(0, Math.min(1, (clientX - bounds.left) / bounds.width));
+    setTimeline(ratio * duration);
+  };
 
   return <section className="audio-brief" aria-labelledby="audio-title">
     <div className="audio-brief-copy"><span>LISTEN FIRST · {audioBrief.label}</span><h2 id="audio-title">{audioBrief.title}</h2><p>The complete signal, restraint and next-watch item in one concise listen.</p></div>
     <div className="audio-controls">
       <button type="button" onClick={() => seek(-15)} aria-label="Back 15 seconds">−15</button>
       <button type="button" className="audio-play" onClick={toggle} aria-label={playing ? "Pause The Echo audio brief" : "Play The Echo audio brief"}>{playing ? "Ⅱ" : "▶"}</button>
-      <div className="audio-timeline"><span>{clock(current)}</span><input type="range" min="0" max={duration || 0} step="0.1" value={current} onChange={(event) => { if (audio.current) audio.current.currentTime = Number(event.target.value); }} aria-label="Audio timeline" /><span>{duration ? clock(duration) : "~2:00"}</span></div>
+      <div className="audio-timeline"><span>{clock(current)}</span><input type="range" min="0" max={duration || 0} step="0.1" value={current} style={{ "--audio-progress": `${progress}%` } as React.CSSProperties} onInput={(event) => setTimeline(Number(event.currentTarget.value))} onClick={(event) => scrubAtClientX(event.currentTarget, event.clientX)} onPointerDown={(event) => { event.currentTarget.setPointerCapture(event.pointerId); scrubAtClientX(event.currentTarget, event.clientX); }} onPointerMove={(event) => { if (event.currentTarget.hasPointerCapture(event.pointerId)) scrubAtClientX(event.currentTarget, event.clientX); }} onPointerUp={(event) => { scrubAtClientX(event.currentTarget, event.clientX); event.currentTarget.releasePointerCapture(event.pointerId); }} aria-label="Audio timeline" /><span>{duration ? clock(duration) : "~2:00"}</span></div>
       <button type="button" onClick={() => seek(15)} aria-label="Forward 15 seconds">+15</button>
-      <select value={speed} onChange={(event) => { const next = Number(event.target.value); setSpeed(next); if (audio.current) audio.current.playbackRate = next; }} aria-label="Playback speed"><option value="1">1×</option><option value="1.25">1.25×</option><option value="1.5">1.5×</option></select>
+      <select value={speed} onChange={(event) => setSpeed(Number(event.target.value))} aria-label="Playback speed"><option value="1">1×</option><option value="1.25">1.25×</option><option value="1.5">1.5×</option><option value="2">2×</option></select>
     </div>
     <details className="audio-transcript"><summary>Read the full transcript</summary><div>{audioBrief.paragraphs.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}</div></details>
-    <audio ref={audio} preload="metadata" src={audioBrief.src} onLoadedMetadata={(event) => setDuration(event.currentTarget.duration)} onTimeUpdate={(event) => setCurrent(event.currentTarget.currentTime)} onPlay={() => setPlaying(true)} onPause={() => setPlaying(false)} onEnded={() => { setPlaying(false); setCurrent(0); }} />
+    <audio ref={audio} preload="metadata" src={audioBrief.src} onLoadedMetadata={(event) => setDuration(event.currentTarget.duration)} onDurationChange={(event) => setDuration(event.currentTarget.duration)} onTimeUpdate={(event) => setCurrent(event.currentTarget.currentTime)} onPlay={() => setPlaying(true)} onPause={() => setPlaying(false)} onEnded={() => { setPlaying(false); setCurrent(0); }} />
   </section>;
 }
 
@@ -136,8 +153,9 @@ function SourceLedger() {
 
 export default function Dashboard() {
   const quoteSources = sources.filter((source) => source.quote);
-  const playerSources = sources.filter((source) => source.category === "Players & Coaches");
+  const voiceSources = sources.filter((source) => source.category === "Voices & Participants");
   const fanQuotes = sources.filter((source) => source.category === "Fans" && source.quote);
+  const matQuote = sources.find((source) => source.id === "taurasi-mat");
 
   async function share() {
     const payload = { title: `${edition.series}: ${edition.title}`, text: edition.subtitle, url: window.location.href };
@@ -146,7 +164,7 @@ export default function Dashboard() {
   }
 
   return <main>
-    <header className="topbar"><Brand compact /><span>Ownership Intelligence · Perception Monitor</span><div><button onClick={() => window.print()}>Print</button><button onClick={share}>Share</button></div></header>
+    <header className="topbar"><Brand compact /><span>Ownership Intelligence · Legacy Monitor</span><div><button onClick={() => window.print()}>Print</button><button onClick={share}>Share</button></div></header>
 
     <AudioBrief />
 
@@ -154,7 +172,7 @@ export default function Dashboard() {
       <div className="hero-art" aria-hidden="true"><span>THE</span><strong>ECHO</strong><i /></div>
       <div className="hero-copy">
         <div className="hero-marks"><img src={`${basePath}/assets/teams/mercury-logo.png`} alt="Phoenix Mercury" /><span>AVC · OWNERSHIP INTELLIGENCE</span></div>
-        <p className="eyebrow">{edition.series} · EDITION 001</p>
+        <p className="eyebrow">{edition.series} · EDITION {edition.number}</p>
         <h1>{edition.title}</h1>
         <p className="subtitle">{edition.subtitle}</p>
         <div className="hero-meta"><span>Event<br /><strong>{edition.eventDate}</strong></span><span>Reporting window<br /><strong>{edition.reportingWindow}</strong></span><span>Confidence<br /><strong>{edition.confidence}</strong></span></div>
@@ -167,7 +185,7 @@ export default function Dashboard() {
 
     <section id="readout" className="report-section lead-section">
       <SectionHead n="01" eyebrow="Executive interpretation" title="Ownership readout" />
-      <div className="readout"><p>{edition.readout}</p><aside><span>Dominant signal</span><strong>{edition.overallDirection}</strong><p>The shot made the acquisition legible. The stay question keeps the read grounded.</p></aside></div>
+      <div className="readout"><p>{edition.readout}</p>{matQuote && <aside className="ownership-quote"><span>The line ownership should keep</span><blockquote>“{matQuote.quote}”</blockquote><p><strong>{matQuote.speaker}</strong><br />{matQuote.quoteContext}</p><SourceLink source={matQuote}>Watch the full halftime ceremony</SourceLink></aside>}</div>
     </section>
 
     <section id="signal" className="report-section dark-section">
@@ -183,18 +201,18 @@ export default function Dashboard() {
     </section>
 
     <section id="voices" className="report-section dark-section">
-      <SectionHead n="04" eyebrow="Direct evidence" title="What players and coaches are saying" copy="Every selected quote is presented in full on the page, with speaker and context. The source link is available only when ownership wants the complete article or interview." />
-      <div className="quote-grid">{playerSources.filter((source) => source.quote).map((source) => <QuoteCard key={source.id} source={source} />)}</div>
-      <div className="interpretation"><span>Interpretation</span><p>The public player-and-coach language converged on fit, intelligence and collective response. The most important restraint: the available public sample did not include a broad set of direct teammate reactions to Plum, so chemistry claims remain early.</p></div>
+      <SectionHead n="04" eyebrow="Direct evidence" title="The people inside the moment" copy="Selected direct quotations appear in full, with speaker, context and a link to the complete ceremony, interview or statement." />
+      <div className="quote-grid">{voiceSources.filter((source) => source.quote).map((source) => <QuoteCard key={source.id} source={source} />)}</div>
+      <div className="interpretation"><span>Interpretation</span><p>The language converged around something deeper than achievement. Diana named aligned values, shared ambition, respect, equality and belonging. Penny Taylor and Bridget Pettis described loyalty and the way Taurasi enlarged the people around her. That combination made the ceremony feel earned rather than merely produced.</p></div>
     </section>
 
-    <AudienceSection id="local" n="05" title="The Valley saw arrival and validation" category="Local Media" copy="Phoenix coverage treated the game as a debut story first, then widened the frame to the comeback, Thomas’s creation and the trade’s larger meaning." />
-    <AudienceSection id="national" n="06" title="The game broke beyond routine recap" category="National Media" copy="National framing centered the shot and the instant fit. Opponent-market coverage supplied the clearest counterweight through officiating and closing-execution concerns." />
-    <AudienceSection id="creators" n="07" title="The highlight traveled faster than analysis" category="Creators" copy="Accessible creator evidence was limited during the short window. What did circulate centered the first basket, the late three and Plum’s return to the floor." />
+    <AudienceSection id="local" n="05" title="The Valley recognized one of its defining athletes" category="Local Media" copy="Local coverage treated the night as civic sports memory: a sold-out room, an unusually broad guest list and a number placed permanently above the city." />
+    <AudienceSection id="national" n="06" title="National coverage saw legacy—and the person inside it" category="National Media" copy="The national frame emphasized career scale, authenticity and the possibility that Taurasi’s relationship with Phoenix could continue through ownership." />
+    <AudienceSection id="creators" n="07" title="Specialists focused on meaning, not only pageantry" category="Creators" copy="The strongest creator and specialist work connected the spectacle to loyalty, Phoenix basketball identity and the emotional texture of retirement." />
 
     <section id="fans" className="report-section dark-section">
-      <SectionHead n="08" eyebrow="Indicative fan pulse" title="Excitement, transfer of affinity—and a live stay question" copy="Visible fan responses are sampled, nonrepresentative and selected to preserve both enthusiasm and friction." />
-      <div className="fan-themes"><article><span>01</span><h3>The shot</h3><p>Immediate validation language followed the corner three.</p></article><article><span>02</span><h3>Natural Mercury</h3><p>Personality and competitive identity were repeatedly linked.</p></article><article><span>03</span><h3>New attention</h3><p>Several visible commenters said they would tune in or attend.</p></article><article><span>04</span><h3>Price and permanence</h3><p>The trade’s value remained conditional on Plum staying.</p></article></div>
+      <SectionHead n="08" eyebrow="Indicative fan pulse" title="Pride in the honor, frustration with the finish" copy="Visible fan responses are sampled and nonrepresentative. They consistently separated the quality of the ceremony from the disappointment of the 88–85 loss." />
+      <div className="fan-themes"><article><span>01</span><h3>The speech</h3><p>Taurasi’s direct address to Phoenix was the emotional center.</p></article><article><span>02</span><h3>The flowers</h3><p>One representative from each season made 20 years tangible.</p></article><article><span>03</span><h3>The room</h3><p>Valley icons and former teammates gave the event unusual scale.</p></article><article><span>04</span><h3>The split screen</h3><p>The tribute drew praise even where the game result drew anger.</p></article></div>
       <div className="quote-grid fan-quotes">{fanQuotes.map((source) => <QuoteCard key={source.id} source={source} quiet />)}</div>
       <p className="method-note">Ordinary fan handles are omitted in the presentation. Original comments remain available at the linked public threads.</p>
     </section>
@@ -205,7 +223,7 @@ export default function Dashboard() {
     </section>
 
     <section className="report-section quote-board">
-      <SectionHead n="10" eyebrow="Verified language" title="Quote board" />
+      <SectionHead n="10" eyebrow="Verified language" title="What the night sounded like" />
       <div className="quote-board-grid">{quoteSources.slice(0, 8).map((source) => <QuoteCard key={source.id} source={source} />)}</div>
     </section>
 
@@ -230,6 +248,6 @@ export default function Dashboard() {
       <SourceLedger />
     </section>
 
-    <footer className="site-footer"><div><Brand /><p>Prepared for Mat and Phoenix Mercury leadership.<br />Evidence first. Direction without overstatement.</p></div><div><span>THE ECHO · EDITION 001</span><strong>#DOMINATE</strong><small>Generated August 4, 2026 · America/Phoenix</small></div><i /></footer>
+    <footer className="site-footer"><div><Brand /><p>Prepared for Mat and Phoenix Mercury leadership.<br />Evidence first. Direction without overstatement.</p></div><div><span>THE ECHO · EDITION {edition.number}</span><strong>#DOMINATE</strong><small>Generated August 17, 2026 · America/Phoenix</small></div><i /></footer>
   </main>;
 }

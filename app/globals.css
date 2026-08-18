@@ -20,3 +20,28 @@
 
 /* GitHub Pages public-asset base path. */
 .hero{background-image:linear-gradient(135deg,rgba(7,8,13,.78),rgba(7,8,13,.94)),url('/the-echo/assets/backgrounds/mercury-game-bg.jpg')}
+
+/* Edition 002 — preserve the Echo system; shift the edition toward Mercury purple, desert gold and archival black. */
+:root{--teal:#f28a1d;--teal2:#ffd166;--orange:#f05a28;--purple:#6f42a8;--gold:#d9ad5b}
+.hero{background-image:linear-gradient(90deg,rgba(7,5,13,.96) 0%,rgba(7,5,13,.83) 48%,rgba(7,5,13,.42) 100%),url('/the-echo/assets/backgrounds/taurasi-ring-of-honor.jpg');background-position:center;background-size:cover}
+.hero:before{background:radial-gradient(circle at 78% 34%,rgba(217,173,91,.2),transparent 31%),linear-gradient(90deg,transparent 49.8%,rgba(255,255,255,.07) 50%,transparent 50.2%)}
+.section-head>span,.source-card-top>span,.method-grid span,.methodology summary span{color:#7b419f}
+.dark-section .section-head>span,.quote-board .section-head>span,.eyebrow{color:var(--teal2)}
+.section-nav a:first-child{background:var(--teal2);color:#1a1020}
+.readout aside{border-top-color:var(--gold);background:#eee7d7}
+.readout aside span{color:#6f3d88}
+.ownership-quote blockquote{margin:14px 0 16px;font-family:Georgia,serif;font-size:19px;line-height:1.48;color:#231c29}
+.ownership-quote p strong{display:inline;margin:0;font-size:11px}
+.ownership-quote .source-link{color:#6f3d88;text-align:left}
+.audio-timeline input{-webkit-appearance:none;appearance:none;height:5px;border:0;border-radius:999px;background:linear-gradient(to right,var(--teal2) 0 var(--audio-progress,0%),#343642 var(--audio-progress,0%) 100%);cursor:pointer;touch-action:pan-y}
+.audio-timeline input::-webkit-slider-runnable-track{height:5px;border-radius:999px;background:transparent}
+.audio-timeline input::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:15px;height:15px;margin-top:-5px;border:2px solid #100b16;border-radius:50%;background:var(--teal2);box-shadow:0 0 0 2px rgba(255,209,102,.22)}
+.audio-timeline input::-moz-range-track{height:5px;border-radius:999px;background:transparent}
+.audio-timeline input::-moz-range-progress{height:5px;border-radius:999px;background:var(--teal2)}
+.audio-timeline input::-moz-range-thumb{width:13px;height:13px;border:2px solid #100b16;border-radius:50%;background:var(--teal2)}
+.audio-brief{background:radial-gradient(circle at 8% 0,rgba(111,66,168,.28),transparent 34%),linear-gradient(125deg,#17101e,#08090e 64%);border-color:rgba(217,173,91,.5);box-shadow:inset 0 3px 0 var(--gold),inset 0 0 28px rgba(111,66,168,.12),0 0 0 1px rgba(217,173,91,.14),0 0 34px rgba(111,66,168,.25)}
+.meter i{background:linear-gradient(90deg,var(--purple),var(--gold),var(--orange))}
+.source-quote{border-left-color:var(--gold)}
+.site-footer>i{background:linear-gradient(90deg,var(--purple),var(--gold),var(--orange))}
+
+@media(max-width:500px){.hero{min-height:0;background-position:58% center}.hero-copy{padding-top:38px;padding-bottom:48px}.hero-art{top:76px;opacity:.07}.hero h1{font-size:clamp(48px,15vw,66px);line-height:.9}.subtitle{font-size:20px;line-height:1.32}.hero-thesis{font-size:14px}.ownership-quote blockquote{font-size:18px}.audio-timeline input{min-height:24px;background-clip:content-box;padding-block:9px}.audio-timeline input::-webkit-slider-thumb{width:20px;height:20px;margin-top:-8px}.audio-timeline input::-moz-range-thumb{width:18px;height:18px}}
