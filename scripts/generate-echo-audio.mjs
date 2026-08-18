@@ -7,7 +7,7 @@ import { spawnSync } from "node:child_process";
 const DEFAULT_VOICE_ID = "Ib97zM6uFBc71OWgj75I";
 
 const inputPath = resolve(process.env.AUDIO_INPUT_PATH ?? "content/audio-brief-transcript.txt");
-const outputPath = resolve(process.env.AUDIO_OUTPUT_PATH ?? "public/audio/the-echo-002-the-number-that-stayed-v2.mp3");
+const outputPath = resolve(process.env.AUDIO_OUTPUT_PATH ?? "public/audio/the-echo-002-the-number-that-stayed-v3.mp3");
 const narration = (await readFile(inputPath, "utf8")).trim();
 if (!narration) throw new Error("Narration text is empty.");
 if (!narration.endsWith("Dominate!")) throw new Error("Narration must end with an emphatic Dominate!");

@@ -26,7 +26,7 @@ if (audioTranscript !== audioBrief.paragraphs.join("\n\n")) failures.push("Visib
 if (audioTranscript.toLowerCase().includes("ownership read")) failures.push("Audio transcript contains the pronunciation-ambiguous phrase: ownership read");
 if (audioBrief.paragraphs.at(-1) !== "Dominate!") failures.push("Audio brief must end with an emphatic Dominate!");
 await access("public/og-the-number-that-stayed-v1.png");
-await access("public/audio/the-echo-002-the-number-that-stayed-v2.mp3");
+await access("public/audio/the-echo-002-the-number-that-stayed-v3.mp3");
 await access("public/assets/brand/AVC-logo-horizontal-dark.svg");
 await access("public/assets/teams/mercury-logo.png");
 await access("public/assets/backgrounds/taurasi-ring-of-honor.jpg");

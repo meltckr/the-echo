@@ -51,12 +51,12 @@ function AudioBrief() {
   const [playing, setPlaying] = useState(false);
   const [current, setCurrent] = useState(0);
   const [duration, setDuration] = useState(0);
-  const [speed, setSpeed] = useState(1);
+  const [speed, setSpeed] = useState(1.1);
   const progress = duration > 0 ? Math.min(100, Math.max(0, (current / duration) * 100)) : 0;
   useEffect(() => {
     if (!audio.current) return;
     audio.current.playbackRate = speed;
-    audio.current.preservesPitch = true;
+    if ("preservesPitch" in audio.current) audio.current.preservesPitch = true;
   }, [speed]);
   useEffect(() => {
     if (!playing) return;
@@ -71,7 +71,11 @@ function AudioBrief() {
   const clock = (seconds: number) => `${Math.floor(seconds / 60)}:${String(Math.floor(seconds % 60)).padStart(2, "0")}`;
   const toggle = async () => {
     if (!audio.current) return;
-    if (audio.current.paused) await audio.current.play();
+    if (audio.current.paused) {
+      audio.current.playbackRate = speed;
+      if ("preservesPitch" in audio.current) audio.current.preservesPitch = true;
+      await audio.current.play();
+    }
     else audio.current.pause();
   };
   const seek = (seconds: number) => {
@@ -99,10 +103,10 @@ function AudioBrief() {
       <button type="button" className="audio-play" onClick={toggle} aria-label={playing ? "Pause The Echo audio brief" : "Play The Echo audio brief"}>{playing ? "Ⅱ" : "▶"}</button>
       <div className="audio-timeline"><span>{clock(current)}</span><input type="range" min="0" max={duration || 0} step="0.1" value={current} style={{ "--audio-progress": `${progress}%` } as React.CSSProperties} onInput={(event) => setTimeline(Number(event.currentTarget.value))} onClick={(event) => scrubAtClientX(event.currentTarget, event.clientX)} onPointerDown={(event) => { event.currentTarget.setPointerCapture(event.pointerId); scrubAtClientX(event.currentTarget, event.clientX); }} onPointerMove={(event) => { if (event.currentTarget.hasPointerCapture(event.pointerId)) scrubAtClientX(event.currentTarget, event.clientX); }} onPointerUp={(event) => { scrubAtClientX(event.currentTarget, event.clientX); event.currentTarget.releasePointerCapture(event.pointerId); }} aria-label="Audio timeline" /><span>{duration ? clock(duration) : "~2:00"}</span></div>
       <button type="button" onClick={() => seek(15)} aria-label="Forward 15 seconds">+15</button>
-      <select value={speed} onChange={(event) => setSpeed(Number(event.target.value))} aria-label="Playback speed"><option value="1">1×</option><option value="1.25">1.25×</option><option value="1.5">1.5×</option><option value="2">2×</option></select>
+      <select value={speed} onChange={(event) => setSpeed(Number(event.target.value))} aria-label="Playback speed"><option value="1">1×</option><option value="1.1">1.1×</option><option value="1.25">1.25×</option><option value="1.5">1.5×</option><option value="2">2×</option></select>
     </div>
     <details className="audio-transcript"><summary>Read the full transcript</summary><div>{audioBrief.paragraphs.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}</div></details>
-    <audio ref={audio} preload="metadata" src={audioBrief.src} onLoadedMetadata={(event) => setDuration(event.currentTarget.duration)} onDurationChange={(event) => setDuration(event.currentTarget.duration)} onTimeUpdate={(event) => setCurrent(event.currentTarget.currentTime)} onPlay={() => setPlaying(true)} onPause={() => setPlaying(false)} onEnded={() => { setPlaying(false); setCurrent(0); }} />
+    <audio ref={audio} preload="metadata" src={audioBrief.src} onLoadedMetadata={(event) => { event.currentTarget.playbackRate = speed; if ("preservesPitch" in event.currentTarget) event.currentTarget.preservesPitch = true; setDuration(event.currentTarget.duration); }} onCanPlay={(event) => { event.currentTarget.playbackRate = speed; if ("preservesPitch" in event.currentTarget) event.currentTarget.preservesPitch = true; }} onDurationChange={(event) => setDuration(event.currentTarget.duration)} onTimeUpdate={(event) => setCurrent(event.currentTarget.currentTime)} onPlay={(event) => { event.currentTarget.playbackRate = speed; if ("preservesPitch" in event.currentTarget) event.currentTarget.preservesPitch = true; setPlaying(true); }} onPause={() => setPlaying(false)} onEnded={() => { setPlaying(false); setCurrent(0); }} />
   </section>;
 }
 

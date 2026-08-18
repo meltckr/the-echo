@@ -30,9 +30,9 @@ export const edition = {
 export const audioBrief = {
   title: "The Number That Stayed",
   label: "Two-minute ownership audio",
-  src: "/the-echo/audio/the-echo-002-the-number-that-stayed-v2.mp3",
+  src: "/the-echo/audio/the-echo-002-the-number-that-stayed-v3.mp3",
   paragraphs: [
-    "Mat, here’s my perspective on Diana Taurasi’s Ring of Honor night.",
+    "Mat, the response to Diana Taurasi’s Ring of Honor night was clear: Phoenix gave one of its defining athletes a first-class tribute, and the public recognized it that way.",
     "The Mercury lost to Portland, eighty-eight to eighty-five, and the public frustration with that result was real. But it did not swallow the evening. The ceremony was received as a first-class organizational achievement: a full building, a national ESPN window, Valley and basketball icons in the room, and twenty returning teammates, coaches and executives—one for every season Diana played in Phoenix.",
     "The most important ownership signal came from Diana herself. At halftime, she thanked you and described what it meant to be around someone whose values align with hers and who shares the same winning mindset. She said you brought that to Phoenix. She then thanked Josh for showing up every day and treating the players with the respect and equality they had always wanted.",
     "Those comments matter because they were not organizational messaging. They were independent testimony from the person being honored. In a few sentences, Diana connected the franchise’s past to its current leadership and made treatment, trust and ambition part of the public record.",
