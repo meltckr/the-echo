@@ -60,14 +60,13 @@ function AudioBrief() {
   }, [speed]);
   useEffect(() => {
     if (!playing) return;
-    let frame = 0;
     const syncProgress = () => {
       if (!audio.current || audio.current.paused) return;
       setCurrent(audio.current.currentTime);
-      frame = window.requestAnimationFrame(syncProgress);
     };
-    frame = window.requestAnimationFrame(syncProgress);
-    return () => window.cancelAnimationFrame(frame);
+    syncProgress();
+    const timer = window.setInterval(syncProgress, 100);
+    return () => window.clearInterval(timer);
   }, [playing]);
   const clock = (seconds: number) => `${Math.floor(seconds / 60)}:${String(Math.floor(seconds % 60)).padStart(2, "0")}`;
   const toggle = async () => {
