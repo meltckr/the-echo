@@ -30,10 +30,10 @@ export const edition = {
 export const audioBrief = {
   title: "The Number That Stayed",
   label: "Two-minute ownership audio",
-  src: "/the-echo/audio/the-echo-002-the-number-that-stayed.mp3",
+  src: "/the-echo/audio/the-echo-002-the-number-that-stayed-v2.mp3",
   paragraphs: [
-    "Mat, here is the ownership read from Diana Taurasi’s Ring of Honor night.",
-    "The Mercury lost to Portland, 88–85, and the public frustration with that result was real. But it did not swallow the evening. The ceremony was received as a first-class organizational achievement: a full building, a national ESPN window, Valley and basketball icons in the room, and 20 returning teammates, coaches and executives—one for every season Diana played in Phoenix.",
+    "Mat, here’s my perspective on Diana Taurasi’s Ring of Honor night.",
+    "The Mercury lost to Portland, eighty-eight to eighty-five, and the public frustration with that result was real. But it did not swallow the evening. The ceremony was received as a first-class organizational achievement: a full building, a national ESPN window, Valley and basketball icons in the room, and twenty returning teammates, coaches and executives—one for every season Diana played in Phoenix.",
     "The most important ownership signal came from Diana herself. At halftime, she thanked you and described what it meant to be around someone whose values align with hers and who shares the same winning mindset. She said you brought that to Phoenix. She then thanked Josh for showing up every day and treating the players with the respect and equality they had always wanted.",
     "Those comments matter because they were not organizational messaging. They were independent testimony from the person being honored. In a few sentences, Diana connected the franchise’s past to its current leadership and made treatment, trust and ambition part of the public record.",
     "The rest of the night reinforced that idea. Penny Taylor spoke about loyalty. Bridget Pettis spoke about how Diana made the people around her better. Devin Booker, Larry Fitzgerald, Michael Phelps, Brittney Griner and others made the room feel like a gathering of the Valley’s sporting memory, not simply a halftime promotion.",
